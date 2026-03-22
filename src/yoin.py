@@ -1,7 +1,7 @@
 from textual.app import App, ComposeResult
 from textual.screen import Screen
 from textual.widgets import Label
-from textual.containers import Vertical
+from textual.containers import Horizontal, Vertical, VerticalGroup, VerticalScroll
 
 
 class WelcomeScreen(Screen):
@@ -20,9 +20,23 @@ class WelcomeScreen(Screen):
         self.app.push_screen(DashboardScreen())
 
 
+class AudioVisualizer(Vertical):
+    pass
+
+
+class ChannelContainer(VerticalScroll):
+    pass
+
+
 class DashboardScreen(Screen):
     def compose(self) -> ComposeResult:
-        yield Label("DASHBOARD", id="h1")
+        yield VerticalGroup(
+            Horizontal(
+                AudioVisualizer(),
+                Vertical(),
+            ),
+            ChannelContainer(),
+        )
 
 
 class Yoin(App):
