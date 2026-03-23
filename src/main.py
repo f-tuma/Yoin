@@ -1,4 +1,4 @@
-from src.yoin import Yoin
+from yoin import Yoin
 
 
 def main():
