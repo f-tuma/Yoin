@@ -1,5 +1,7 @@
 import numpy as np
 import sounddevice as sd
+from textual.containers import HorizontalGroup
+from textual.widgets import Input, Label
 
 from values import sound_layers
 
@@ -10,13 +12,25 @@ class SoundLayer:
         self.volume = volume
         self.start_idx = 0
         self.muted = False
+        self.settings = []
 
 
 class ToneLayer(SoundLayer):
-    def __init__(self, samplerate, volume, frequency, lfo=0.0) -> None:
+    def __init__(self, samplerate, volume, frequency=123, lfo=0.0) -> None:
         super().__init__(samplerate, volume)
         self.frequency = frequency
         self.lfo = lfo
+        frequency_setting = HorizontalGroup(
+            Label("FRQ:"),
+            Input(type="integer", value=f"{self.frequency}"),
+            classes="setting-group",
+        )
+        lfo_setting = HorizontalGroup(
+            Label("LFO:"),
+            Input(type="integer", value=f"{int(self.lfo * 100)}"),
+            classes="setting-group",
+        )
+        self.settings = [frequency_setting, lfo_setting]
 
     def get_next_chunk(self, frames: int) -> np.ndarray:
         timeline = np.arange(self.start_idx, self.start_idx + frames) / self.samplerate

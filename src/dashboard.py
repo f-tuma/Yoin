@@ -12,7 +12,7 @@ from textual.screen import ModalScreen, Screen
 from textual.widgets import Button, Label, OptionList
 from textual.widgets.option_list import Option
 from textual_slider import Slider
-from textual.containers import HorizontalGroup, VerticalScroll
+from textual.containers import HorizontalGroup, Vertical, VerticalScroll
 
 
 class DashboardScreen(Screen):
@@ -79,7 +79,7 @@ class ChannelSelector(ModalScreen):
         self.dismiss(None)
 
 
-class ChannelContainer(HorizontalGroup):
+class ChannelContainer(Vertical):
     def __init__(
         self,
         *children,
@@ -104,7 +104,7 @@ class ChannelContainer(HorizontalGroup):
         sound_layers.add(self.sound_layer)
 
     def compose(self) -> ComposeResult:
-        with HorizontalGroup(classes="channel-row"):
+        with HorizontalGroup(classes="channel-row primary-controls"):
             yield Label(f"{self.c_name}", id="channel-name")
             yield Slider(
                 min=0,
@@ -121,9 +121,23 @@ class ChannelContainer(HorizontalGroup):
                 classes="channel-item",
             )
 
+        if self.sound_layer.settings:
+            with HorizontalGroup(classes="channel-row secondary-controls"):
+                for setting in self.sound_layer.settings:
+                    yield setting
+
     @on(Button.Pressed, "#mute_btn")
-    def on_mute_pressed(self):
-        self.sound_layer.muted = False if self.sound_layer.muted else True
+    def on_mute_pressed(self, event: Button.Pressed):
+        self.sound_layer.muted = not self.sound_layer.muted
+
+        if self.sound_layer.muted:
+            event.button.label = "Unmute"
+            event.button.variant = "warning"
+            self.add_class("muted-channel")
+        else:
+            event.button.label = "Mute"
+            event.button.variant = "default"
+            self.remove_class("muted-channel")
 
     @on(Button.Pressed, "#remove-channel")
     def on_remove_pressed(self):
