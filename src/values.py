@@ -1,7 +1,8 @@
 import weakref
 
 sound_layers = weakref.WeakSet()
-
+sound_layers_l = weakref.WeakSet()
+sound_layers_r = weakref.WeakSet()
 
 # GLOBAL VALUES
 

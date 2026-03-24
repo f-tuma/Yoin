@@ -9,6 +9,7 @@ class SoundLayer:
         self.samplerate = samplerate
         self.volume = volume
         self.start_idx = 0
+        self.muted = False
 
 
 class ToneLayer(SoundLayer):
@@ -53,10 +54,11 @@ class BrownNoiseLayer(SoundLayer):
 def mixer_callback(outdata, frames: int, time, status):
     wave = np.zeros(frames)
     for layer in sound_layers:
-        wave = wave + layer.get_next_chunk(frames)
+        if not layer.muted:
+            wave = wave + layer.get_next_chunk(frames)
     outdata[:] = wave.reshape(-1, 1)
 
 
-stream = sd.OutputStream(samplerate=44100, channels=1, callback=mixer_callback)
+stream = sd.OutputStream(samplerate=44100, channels=2, callback=mixer_callback)
 
 stream.start()

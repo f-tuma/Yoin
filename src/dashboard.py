@@ -9,9 +9,10 @@ from values import DEF_FREQUENCY, DEF_VOLUME, sound_layers, samplerate
 from textual import on
 from textual.app import ComposeResult
 from textual.screen import ModalScreen, Screen
-from textual.widgets import Button, Label, Select
+from textual.widgets import Button, Label, OptionList
+from textual.widgets.option_list import Option
 from textual_slider import Slider
-from textual.containers import HorizontalGroup, Vertical, VerticalScroll
+from textual.containers import HorizontalGroup, VerticalScroll
 
 
 class DashboardScreen(Screen):
@@ -21,7 +22,7 @@ class DashboardScreen(Screen):
     ]
 
     def compose(self) -> ComposeResult:
-        yield VerticalScroll(id="channels")
+        yield VerticalScroll(id="channels", classes="screen")
 
     def create_channel(self, choice: str):
         s_layer: SoundLayer | None
@@ -42,7 +43,9 @@ class DashboardScreen(Screen):
                 s_layer = None
 
         if s_layer:
-            new_channel = ChannelContainer(c_name=c_name, sound_layer=s_layer)
+            new_channel = ChannelContainer(
+                c_name=c_name, sound_layer=s_layer, classes="sound-channel"
+            )
             self.query_one("#channels").mount(new_channel)
 
     def action_add_channel(self):
@@ -54,26 +57,25 @@ class DashboardScreen(Screen):
 
 
 class ChannelSelector(ModalScreen):
+    BINDINGS = [
+        ("escape", "cancel", "Cancel selection"),
+    ]
+
     def compose(self) -> ComposeResult:
-        options = [
-            ("Tone", "tone"),
-            ("Brown Noise", "brown"),
-            ("White Noise", "white"),
-        ]
 
-        with Vertical(id="channel-selector"):
-            yield Select(
-                options, prompt="Choose sound channel to add...", id="sound-select"
-            )
-            yield Button("Cancel", variant="error", id="cancel")
+        yield OptionList(
+            Option("Tone", id="tone"),
+            Option("Brown Noise", id="brown"),
+            Option("White Noise", id="white"),
+            id="sound-select",
+        )
 
-    @on(Select.Changed)
-    def select_sound(self, event: Select.Changed):
-        if event.value:
-            self.dismiss(event.value)
+    @on(OptionList.OptionSelected)
+    def select_sound(self, event: OptionList.OptionSelected):
+        if event.option_id:
+            self.dismiss(event.option_id)
 
-    @on(Button.Pressed, "#cancel")
-    def cancel(self):
+    def action_cancel(self):
         self.dismiss(None)
 
 
@@ -102,11 +104,26 @@ class ChannelContainer(HorizontalGroup):
         sound_layers.add(self.sound_layer)
 
     def compose(self) -> ComposeResult:
-        yield Label(f"{self.c_name}")
-        yield Slider(
-            min=0, max=100, step=1, value=int(DEF_VOLUME * 100), id="volume-slider"
-        )
-        yield Button("Remove", variant="error", id="remove-channel")
+        with HorizontalGroup(classes="channel-row"):
+            yield Label(f"{self.c_name}", id="channel-name")
+            yield Slider(
+                min=0,
+                max=100,
+                value=int(DEF_VOLUME * 100),
+                id="volume-slider",
+            )
+            yield Button("Mute", variant="default", flat=True, id="mute_btn")
+            yield Button(
+                "Remove",
+                variant="error",
+                flat=True,
+                id="remove-channel",
+                classes="channel-item",
+            )
+
+    @on(Button.Pressed, "#mute_btn")
+    def on_mute_pressed(self):
+        self.sound_layer.muted = False if self.sound_layer.muted else True
 
     @on(Button.Pressed, "#remove-channel")
     def on_remove_pressed(self):
