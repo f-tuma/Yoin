@@ -9,7 +9,7 @@ from values import DEF_FREQUENCY, DEF_VOLUME, sound_layers, samplerate
 from textual import on
 from textual.app import ComposeResult
 from textual.screen import ModalScreen, Screen
-from textual.widgets import Button, Input, Label, OptionList
+from textual.widgets import Button, Footer, Input, Label, OptionList
 from textual.widgets.option_list import Option
 from textual_slider import Slider
 from textual.containers import HorizontalGroup, Vertical, VerticalScroll
@@ -22,6 +22,7 @@ class DashboardScreen(Screen):
     ]
 
     def compose(self) -> ComposeResult:
+        yield Footer()
         yield VerticalScroll(id="channels", classes="screen")
 
     def create_channel(self, choice: str):
