@@ -7,30 +7,32 @@ from values import sound_layers
 
 
 class SoundLayer:
-    def __init__(self, samplerate, volume) -> None:
+    def __init__(self, samplerate, volume, lfo=0.0) -> None:
         self.samplerate = samplerate
         self.volume = volume
         self.start_idx = 0
         self.muted = False
-        self.settings = []
+        self.lfo = lfo
+
+        lfo_setting = HorizontalGroup(
+            Label("LFO:"),
+            Input(type="integer", value=f"{int(self.lfo * 100)}", id="lfo_s"),
+            classes="setting-group",
+        )
+
+        self.settings = [lfo_setting]
 
 
 class ToneLayer(SoundLayer):
-    def __init__(self, samplerate, volume, frequency=123, lfo=0.0) -> None:
+    def __init__(self, samplerate, volume, frequency=123) -> None:
         super().__init__(samplerate, volume)
         self.frequency = frequency
-        self.lfo = lfo
         frequency_setting = HorizontalGroup(
             Label("FRQ:"),
-            Input(type="integer", value=f"{self.frequency}"),
+            Input(type="integer", value=f"{self.frequency}", id="frq_s"),
             classes="setting-group",
         )
-        lfo_setting = HorizontalGroup(
-            Label("LFO:"),
-            Input(type="integer", value=f"{int(self.lfo * 100)}"),
-            classes="setting-group",
-        )
-        self.settings = [frequency_setting, lfo_setting]
+        self.settings.append(frequency_setting)
 
     def get_next_chunk(self, frames: int) -> np.ndarray:
         timeline = np.arange(self.start_idx, self.start_idx + frames) / self.samplerate
@@ -46,7 +48,11 @@ class WhiteNoiseLayer(SoundLayer):
         super().__init__(samplerate, volume)
 
     def get_next_chunk(self, frames: int):
+        timeline = np.arange(self.start_idx, self.start_idx + frames) / self.samplerate
         wave = np.random.uniform(-self.volume, self.volume, frames)
+        lfo_wave = (np.sin(2 * np.pi * self.lfo * timeline) + 1.0) / 2.0
+        wave = wave * lfo_wave
+        self.start_idx += frames
         return wave
 
 
@@ -56,12 +62,15 @@ class BrownNoiseLayer(SoundLayer):
         self.last_val = 0.0
 
     def get_next_chunk(self, frames: int):
+        timeline = np.arange(self.start_idx, self.start_idx + frames) / self.samplerate
         wave = np.zeros(frames)
         white_noise = np.random.uniform(-1.0, 1.0, frames)
         for i in range(frames):
             self.last_val = white_noise[i] + (self.last_val * 0.99)
             wave[i] = self.last_val
-        wave = (wave / 10.0) * self.volume
+        lfo_wave = (np.sin(2 * np.pi * self.lfo * timeline) + 1.0) / 2.0
+        wave = (wave / 10.0) * lfo_wave * self.volume
+        self.start_idx += frames
         return wave
 
 

@@ -9,7 +9,7 @@ from values import DEF_FREQUENCY, DEF_VOLUME, sound_layers, samplerate
 from textual import on
 from textual.app import ComposeResult
 from textual.screen import ModalScreen, Screen
-from textual.widgets import Button, Label, OptionList
+from textual.widgets import Button, Input, Label, OptionList
 from textual.widgets.option_list import Option
 from textual_slider import Slider
 from textual.containers import HorizontalGroup, Vertical, VerticalScroll
@@ -148,3 +148,19 @@ class ChannelContainer(Vertical):
     def on_slider_changed_volume(self, event: Slider.Changed) -> None:
         self.volume = event.value / 100
         self.sound_layer.volume = self.volume
+
+    @on(Input.Changed, "#frq_s")
+    def on_frq_changed(self, event: Input.Changed) -> None:
+        if isinstance(self.sound_layer, ToneLayer) and event.value:
+            try:
+                self.sound_layer.frequency = int(event.value)
+            except ValueError:
+                pass
+
+    @on(Input.Changed, "#lfo_s")
+    def on_lfo_changed(self, event: Input.Changed) -> None:
+        if isinstance(self.sound_layer, SoundLayer) and event.value:
+            try:
+                self.sound_layer.lfo = float(int(event.value) / 100)
+            except ValueError:
+                pass
