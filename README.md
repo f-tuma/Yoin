@@ -15,6 +15,9 @@ This is a very simple terminal tool to create and manage sound layers to create 
 - ToneLayer (Frequency, Support for LFO)
 - WhiteNoise (Support for LFO)
 - BrownNoise (Support for LFO)
+
+
+
 ## Installation
 
 
@@ -34,3 +37,10 @@ rm -r ~/yoin
 ### Window and Mac
 
 *I'm not a fan of Windows not Mac, hence no guide for guys... Sorry... But this is python program, I bet you can figure out how to start main.py in /src directory. ;)*
+
+
+## Acknowledgements
+
+ - [NumPy](https://github.com/numpy/numpy)
+ - [SoundDevice](https://github.com/spatialaudio/python-sounddevice)
+ - [Textual](https://github.com/textualize/textual/)
