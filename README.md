@@ -23,12 +23,12 @@ This is a very simple terminal tool to create and manage sound layers to create 
 Install my-project with curl
 
 ```bash
-  CREATE CURL INSTALL SCRIPT
+CREATE CURL INSTALL SCRIPT
 ```
 You can remove easily by removing the whole directory of this project
 
 ```bash
-  rm -r ~/yoin
+rm -r ~/yoin
 ```
 
 ### Window and Mac
